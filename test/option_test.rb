@@ -38,13 +38,13 @@ class OptionTest < Minitest::Spec
 
         # positional = { a: 1 }
         # keywords   = { a: 2, b: 3 }
-        assert_result option.(positional, keywords, exec_context: step)
+        assert_result option.(positional, keywords, **{ exec_context: step })
       end
 
       it "allows passing a block, too" do
         step = Step.new
 
-        assert_result option.(positional, keywords, {exec_context: step}, &block), block
+        assert_result option.(positional, keywords, **{ exec_context: step }, &block), block
       end
     end
 
@@ -60,7 +60,7 @@ class OptionTest < Minitest::Spec
       end
 
       it "doesn't mind :exec_context" do
-        assert_result option.(positional, keywords, exec_context: "bogus")
+        assert_result option.(positional, keywords, **{ exec_context: "bogus" })
       end
     end
 
@@ -68,11 +68,11 @@ class OptionTest < Minitest::Spec
       let(:option) { Trailblazer::Option(WithPositionalAndKeywords) }
 
       it "passes through all args" do
-        assert_result option.(positional, keywords, exec_context: nil)
+        assert_result option.(positional, keywords, **{ exec_context: nil })
       end
 
       it "allows passing a block, too" do
-        assert_result option.(positional, keywords, {exec_context: nil}, &block), block
+        assert_result option.(positional, keywords, **{ exec_context: nil }, &block), block
       end
     end
   end
@@ -84,17 +84,17 @@ class OptionTest < Minitest::Spec
     end
 
     class Step
-      def with_positionals(a, b, *args)
+      def with_positionals(a, b, *args, **kwargs)
         [a, b, args]
       end
     end
 
-    WITH_POSITIONALS = ->(a, b, *args) do
+    WITH_POSITIONALS = ->(a, b, *args, **kwargs) do
       [a, b, args]
     end
 
     class WithPositionals
-      def self.call(a, b, *args)
+      def self.call(a, b, *args, **kwargs)
         [a, b, args]
       end
     end
@@ -106,19 +106,19 @@ class OptionTest < Minitest::Spec
 
       option = Trailblazer::Option(:with_positionals)
 
-      assert_result_pos option.(*positionals, exec_context: step)
+      assert_result_pos option.(*positionals, **{ exec_context: step })
     end
 
     it "-> {} lambda" do
       option = Trailblazer::Option(WITH_POSITIONALS)
 
-      assert_result_pos option.(*positionals, exec_context: "something")
+      assert_result_pos option.(*positionals, **{ exec_context: "something" })
     end
 
     it "callable" do
       option = Trailblazer::Option(WithPositionals)
 
-      assert_result_pos option.(*positionals, exec_context: "something")
+      assert_result_pos option.(*positionals, **{ exec_context: "something" })
     end
   end
 
@@ -156,7 +156,7 @@ class OptionTest < Minitest::Spec
 
       option = Trailblazer::Option::KW(:with_kws)
 
-      assert_result_kws option.(options, exec_context: step)
+      assert_result_kws option.(options, **{ exec_context: step })
     end
 
     it "Method instance" do
@@ -174,7 +174,7 @@ class OptionTest < Minitest::Spec
     it "lambda ignores :exec_context" do
       option = Trailblazer::Option::KW(WITH_KWS)
 
-      assert_result_kws option.(options, exec_context: "something")
+      assert_result_kws option.(options, **{ exec_context: "something" })
     end
 
     it "callable" do

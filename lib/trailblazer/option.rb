@@ -3,8 +3,8 @@ module Trailblazer
     # A call implementation invoking `proc.(*args)` and plainly forwarding all arguments.
     # Override this for your own step strategy (see KW#call!).
     # @private
-    def self.call!(proc, *args, &block)
-      proc.(*args, &block)
+    def self.call!(proc, *args, **kwargs, &block)
+      proc.(*args, **kwargs, &block)
     end
 
     # Note that both #evaluate_callable and #evaluate_method drop most of the args.
@@ -26,9 +26,9 @@ module Trailblazer
     # @return [Proc] when called, this proc will evaluate its option (at run-time).
     def self.build(call_implementation, proc)
       if proc.is_a? Symbol
-        ->(*args, &block) { call_implementation.evaluate_method(proc, *args, &block) }
+        ->(*args, **kwargs, &block) { call_implementation.evaluate_method(proc, *args, **kwargs, &block) }
       else
-        ->(*args, &block) { call_implementation.evaluate_callable(proc, *args, &block) }
+        ->(*args, **kwargs, &block) { call_implementation.evaluate_callable(proc, *args, **kwargs, &block) }
       end
     end
 
